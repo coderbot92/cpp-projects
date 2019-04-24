@@ -31,17 +31,47 @@ git submodule add https://github.com/svn2github/googletest.git
 - Update the project name in CMakeLists.txt
 - Make sure you have c++ compiler, doxygen and ccmake installed
 
+### Updating to Latest GCC with Minimal Changes
 ``` bash
-# update the list of available packages and their versions but installs/upgrade nothing
-$ sudo apt-get update
-# upgrades the installed packages to newer versions if the installed versions and versions on list do not match 
-$ sudo apt-get upgrade
+# Adds an apt repository
+# Updates the list of available packages
+# Installs the latest GCC (GCC 8 in this case)
+$ sudo apt-get update -y && 
+sudo apt-get install build-essential software-properties-common -y && 
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && 
+sudo apt-get update -y && 
+sudo apt-get install gcc-8 g++-8 -y && 
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8;
 
+# Select from installed gcc alternatives as terminal default
+$ sudo update-alternatives --config gcc
+
+# Optional command
+$ select gcc-8
+
+# Check versions
+$ gcc -v
 $ g++ --version
 $ make -v
+```
+### Updating to Latest GCC with Whole Upgrade of Ubuntu
+``` bash
+# updates the list of available packages and their versions but installs/upgrade nothing
+$ sudo apt-get update
+# upgrades the installed packages to newer versions 
+# if the installed versions and versions on list do not match 
+$ sudo apt-get upgrade
+
+# Check versions
+$ g++ --version
+$ make -v
+
 # package that installs g++, gcc and make (run only if you don't have these)
 $ sudo apt-get install build-essential
-
+```
+### Installing Doxygen and CMake
+``` bash
+# check version
 $ cmake --version
 # if cmake is not available
 $ sudo apt-get install cmake
