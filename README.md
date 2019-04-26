@@ -16,6 +16,14 @@ Tools used in the project:
 - Continuous testing with [Travis-CI](https://travis-ci.org/)
 - Code coverage with [Coveralls.io](https://coveralls.io/)
 
+## Git Configurations
+* The git configurations are present in the file .gitconfig in the repo root
+* Change the configurations according to your needs
+* After cloning repo the following command must be run to incorporate these configs locally:
+```bash
+$ git config --local include.path ../.gitconfig
+```
+
 ## Installation Instructions
 
 Note: Google Tests is the submodule of this project which means that this repo refers to it but does not clone it.
