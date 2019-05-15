@@ -23,6 +23,15 @@ Tools used in the project:
 ```bash
 $ git config --local include.path ../.gitconfig
 ```
+* To verify and see the git configurations for current repository:
+```bash
+$ git config --list
+```
+* To see the list of remotes and see the details of a particular remote e.g. to see which branches are tracked:
+```bash
+$ git remote -v
+$ git remote show origin
+```
 
 ## Installation Instructions
 
