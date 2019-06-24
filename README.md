@@ -10,8 +10,9 @@
 
 Tools used in the project:
 
-- [Google Tests](https://github.com/google/googletest)
 - Use of [CMake](https://cmake.org/) for much easier compiling
+- Use of [Conan](https://docs.conan.io/en/latest/) for dependencies management and packaging
+  - [Google Tests](https://github.com/google/googletest) as unit testing framework
 - Code documentation with [Doxygen](http://www.stack.nl/~dimitri/doxygen/)
 - Continuous testing with [Travis-CI](https://travis-ci.org/)
 - Code coverage with [Coveralls.io](https://coveralls.io/)
@@ -21,16 +22,16 @@ Tools used in the project:
 * Change the configurations according to your needs
 * After cloning repo the following command must be run to incorporate these configs locally:
 ```bash
-$ git config --local include.path ../.gitconfig
+git config --local include.path ../.gitconfig
 ```
 * To verify and see the git configurations for current repository:
 ```bash
-$ git config --list
+git config --list
 ```
 * To see the list of remotes and see the details of a particular remote e.g. to see which branches are tracked:
 ```bash
-$ git remote -v
-$ git remote show origin
+git remote -v
+git remote show origin
 ```
 
 ## Installation Instructions
@@ -53,7 +54,7 @@ git submodule add https://github.com/svn2github/googletest.git
 # Adds an apt repository
 # Updates the list of available packages
 # Installs the latest GCC (GCC 8 in this case)
-$ sudo apt-get update -y && 
+sudo apt-get update -y && 
 sudo apt-get install build-essential software-properties-common -y && 
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && 
 sudo apt-get update -y && 
@@ -61,45 +62,130 @@ sudo apt-get install gcc-8 g++-8 -y &&
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8;
 
 # Select from installed gcc alternatives as terminal default
-$ sudo update-alternatives --config gcc
+sudo update-alternatives --config gcc
 
 # Optional command
-$ select gcc-8
+select gcc-8
 
 # Check versions
-$ gcc -v
-$ g++ --version
-$ make -v
+gcc -v
+g++ --version
+make -v
 ```
 ### Updating to Latest GCC with Whole Upgrade of Ubuntu
 ``` bash
 # updates the list of available packages and their versions but installs/upgrade nothing
-$ sudo apt-get update
+sudo apt-get update
 # upgrades the installed packages to newer versions 
 # if the installed versions and versions on list do not match 
-$ sudo apt-get upgrade
+sudo apt-get upgrade
 
 # Check versions
-$ g++ --version
-$ make -v
+g++ --version
+make -v
 
 # package that installs g++, gcc and make (run only if you don't have these)
-$ sudo apt-get install build-essential
+sudo apt-get install build-essential
 ```
 ### Installing Doxygen and CMake
 ``` bash
 # check version
-$ cmake --version
+cmake --version
 # if cmake is not available
-$ sudo apt-get install cmake
+sudo apt-get install cmake
 
 # install doxygen for documentation generation
-$ sudo apt-get install doxygen
+sudo apt-get install doxygen
 
 # install gui tool for cmake
-$ sudo apt-get install cmake-curses-gui
+sudo apt-get install cmake-curses-gui
 ```
 
+## Conan Commands
+```bash
+# see commands info
+conan help
+conan help <command_name>
+
+# see, add, update remotes
+conan remote list
+
+conan remote add conan-center https://api.bintray.com/conan/conan/conan-center 
+conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+
+conan remote update bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+
+# list packages in local cache (~/.conan/data)
+conan search
+
+# list all gtest packages in conan-center
+conan search gtest -r conan-center
+
+# inspect binary packages in local cache and generate package matrix as html from remote
+conan search gtest/1.8.1@bincrafters/stable
+conan search gtest/1.8.1@bincrafters/stable -r conan-center --table=build/conan_matrix.html
+
+# inspect your current project dependencies, certain package and generate graph
+conan info .
+conan info OpenSSL/1.1.0i@conan/stable
+conan info . --graph=graph.html
+
+# see options and settings etc that can be set for a package
+conan inspect OpenSSL/1.1.0i@conan/stable
+
+# list and see build profiles (~/.conan/profiles)
+conan profile list
+conan profile show default
+
+# install dependencies
+# build dependencies with default profile
+conan install . -r conan-center -if build -b missing
+# build dependencies with specific profile
+conan install . -r conan-center -if build -b missing -pr linux.profile
+# build dependencies with specific profile, override/provide a setting for build
+conan install . -r conan-center -if build -b missing -pr linux.profile -s build_type=RelWithDebInfo
+# build dependencies with specific profile, override/provide a setting for build and option for a dependency
+conan install . -r conan-center -if build -b missing -pr linux.profile -s build_type=RelWithDebInfo -o opencv:shared=True
+
+# build the current project
+conan build . -if build -bf build -sf .
+
+# download only recipe from a remote
+conan download opencv/3.4.3@conan/stable -re -r conan-center
+
+# remove package from local cache
+conan remove <package_name>
+
+# update recipe of package in local cache or add a package for building in local cache
+conan export . <package_name/package_version@username/channel>
+# build this package exported
+conan install <package_name/package_version@username/channel> -r conan-center -if build -b missing -pr linux.profile
+
+# login and upload packages and recipe to a remote
+conan user -p <APIKEY> -r <REMOTE> <USERNAME>
+conan upload opencv/3.4.3@conan/stable -r conan-center --all --force
+conan upload "*" --all -r conan-center -c
+
+##### Conan Cache Structure ######
+Conan Cache Structure:
+ Cache Root: ~/.conan/data
+ Recipe: ~/.conan/data/<package name>/<version>/<user>/<channel>/export
+ Package: ~/.conan/data/<package name>/<version>/<user>/<channel>/package/<hash>
+ Build: ~/.conan/data/<package name>/<version>/<user>/<channel>/build/<hash>
+ Source Code: ~/.conan/data/<package name>/<version>/<user>/<channel>/sources/
+
+############# Conan Package Development In-Source ########
+conan source . -sf tmp/source
+conan install . -if tmp/build [-pr XXXX -r XXXX -b missing]
+conan build . -sf tmp/source -bf tmp/build
+conan package . -sf tmp/source -bf tmp/build -pf tmp/package
+conan export-pkg . user/testing -pf tmp/package
+
+##### Patching a recipe #####
+cp ~/.conan/data/opencv/3.4.3/conan/stable/export/conanfile.py ./patch/conanfile_opencv.py 
+cp -f ./patch/conanfile_opencv.py ~/.conan/data/opencv/3.4.3/conan/stable/export/conanfile.py
+
+```
 ## Structure
 ```
 .
@@ -139,25 +225,25 @@ Example:
 
 ``` bash
 # make and change to build directory
-$ mkdir build && cd build
+mkdir build && cd build
 
 # configure and generate Makefile of project
-$ cmake .. # argument is location of CMakelists.txt
+cmake .. # argument is location of CMakelists.txt
 
 # to run cmake gui and view variable values
-$ ccmake ..
+ccmake ..
 
 # To compile project
-$ make
+make
 
 # To build project, unit tests and also run unit tests
-$ make gtest
+make gtest
 
 # To run project
-$ ./main.x
+./main.x
 
 # To run unit tests
-$ ./unit_tests.x
+./unit_tests.x
 ```
 ## C++ Naming Conventions
 
