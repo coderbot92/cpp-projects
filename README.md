@@ -186,6 +186,67 @@ cp ~/.conan/data/opencv/3.4.3/conan/stable/export/conanfile.py ./patch/conanfile
 cp -f ./patch/conanfile_opencv.py ~/.conan/data/opencv/3.4.3/conan/stable/export/conanfile.py
 
 ```
+
+## General Bash Commands
+```bash
+# read library header to see if 32 bit or 64 bit
+readelf -h <path_to .a file>
+
+# set bash mode to vi and search previous commands fast
+set -o vi
+# Then search a word using: /<word>
+# n to go to next and shift + n to go to previous
+
+# generating SSH Key (generated in ~/.ssh)
+ssh-keygen
+
+# upload public key to bitbucket/github
+
+# load private key and clone/push/pull
+eval $(ssh-agent)
+ssh-add
+git clone <ssh-path>
+
+# adding an existing key to e.g. docker image
+cat ./id_rsa >> ~/.ssh/id_rsa
+chmod 600 ~/.ssh/id_rsa
+
+## General Docker Commands
+```bash
+# build docker image with a tag name from Dockerfile
+docker build . -f <name>.Dockerfile -t <tag_name>
+
+# run a container from an image
+docker run -it --rm -v ~/<some_local_dir>:/src -v <another_local_dir>:/src2 <tag_name> bash
+
+# list images and remove an image
+docker images
+docker rmi <image name>
+
+# cleanup stale images and containers
+docker system prune
+docker container prune
+
+# add/change tag name to image
+docker tag <image_name> <tag_name>
+
+# push/pull images from remote
+docker pull <remote_image_url>
+docker push <remote_image_url>
+
+# list running and stopped containers
+docker ps -a
+
+# attach a container to current shell
+docker attach <hash>
+# restart a container
+docker restart <hash>
+
+# login into online harbor to be able to push images
+docker login <url>/harbor
+
+```
+```
 ## Structure
 ```
 .
